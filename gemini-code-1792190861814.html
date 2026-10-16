@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facturador Profesional - Artemisa</title>
+    <!-- Librería html2pdf para descarga directa -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #d63384;
+            --primary-hover: #b8256e;
+            --bg-color: #f4f6f9;
+            --text-color: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Panel Izquierdo */
+        .form-panel {
+            flex: 1;
+            min-width: 380px;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            height: fit-content;
+        }
+
+        .form-panel h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+            font-size: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .items-form-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .items-form-table th, .items-form-table td {
+            padding: 6px;
+            text-align: left;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .btn-add {
+            background-color: #28a745;
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-add:hover { background-color: #218838; }
+
+        .btn-remove {
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 8px;
+            border-radius: 4px;
+        }
+
+        .btn-download {
+            background-color: var(--primary-color);
+            color: white;
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(214, 51, 132, 0.3);
+        }
+
+        .btn-download:hover { background-color: var(--primary-hover); }
+
+        .btn-history {
+            background-color: #6c757d;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+
+        /* Panel Derecho */
+        .preview-panel {
+            flex: 1.2;
+            min-width: 500px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .invoice-sheet {
+            background: #ffffff;
+            width: 100%;
+            max-width: 750px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .brand-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary-color);
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .brand-subtitle {
+            font-size: 13px;
+            color: #555;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        .invoice-details-box {
+            text-align: right;
+        }
+
+        .invoice-details-box h2 {
+            margin: 0;
+            font-size: 22px;
+            color: #333;
+        }
+
+        .invoice-details-box p {
+            margin: 3px 0;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .section-header {
+            background-color: #fdf0f5;
+            color: var(--primary-color);
+            padding: 6px 10px;
+            font-weight: bold;
+            font-size: 13px;
+            border-left: 4px solid var(--primary-color);
+            margin: 15px 0 10px 0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .invoice-table th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 10px;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .invoice-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+
+        .totals-container {
+            margin-top: 15px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .totals-table {
+            width: 260px;
+            border-collapse: collapse;
+        }
+
+        .totals-table td {
+            padding: 5px 8px;
+            font-size: 13px;
+        }
+
+        .totals-table .grand-total {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--primary-color);
+            border-top: 2px solid var(--primary-color);
+        }
+
+        .invoice-footer {
+            margin-top: 35px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            text-align: center;
+            font-size: 11px;
+            color: #777;
+        }
+
+        @media (max-width: 900px) {
+            .container { flex-direction: column; }
+            .preview-panel { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Panel Formulario -->
+    <div class="form-panel">
+        <h2>
+            Facturador Artemisa
+            <button class="btn btn-history" onclick="mostrarHistorial()">Histórico</button>
+        </h2>
+        
+        <div class="grid-2">
+            <div class="form-group">
+                <label>N° Factura (Consecutivo)</label>
+                <input type="text" id="f_num" value="ART-001" oninput="actualizarFactura()">
+            </div>
+            <div class="form-group">
+                <label>Fecha</label>
+                <input type="date" id="f_fecha" oninput="actualizarFactura()">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Nombre del Cliente</label>
+            <input type="text" id="f_cliente_nombre" value="Carolina Mendoza" oninput="actualizarFactura()">
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Cédula / NIT</label>
+                <input type="text" id="f_cliente_doc" value="1.018.452.890" oninput="actualizarFactura()">
+            </div>
+            <div class="form-group">
+                <label>Teléfono</label>
+                <input type="text" id="f_cliente_tel" value="312 456 7890" oninput="actualizarFactura()">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Dirección de Envío</label>
+            <input type="text" id="f_cliente_dir" value="Cl. 145 #15-24, Apt 302, Bogotá" oninput="actualizarFactura()">
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Método de Pago</label>
+                <select id="f_metodo_pago" onchange="actualizarFactura()">
+                    <option value="Transferencia Nequi / Bancolombia" selected>Transferencia Nequi / Bancolombia</option>
+                    <option value="Efectivo / Contraentrega">Efectivo / Contraentrega</option>
+                    <option value="Sistecrédito">Sistecrédito</option>
+                    <option value="Luegopago">Luegopago</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Transportadora / N° Guía</label>
+                <input type="text" id="f_guia" value="Interrapidísimo - Guía N° 21004859203" oninput="actualizarFactura()">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Costo de Envío ($)</label>
+            <input type="number" id="f_envio" value="12000" oninput="actualizarFactura()">
+        </div>
+
+        <h3 style="font-size: 15px; margin-top: 20px; color: var(--primary-color);">Productos</h3>
+        <table class="items-form-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th style="width: 60px;">Cant.</th>
+                    <th style="width: 90px;">Precio</th>
+                    <th style="width: 30px;"></th>
+                </tr>
+            </thead>
+            <tbody id="items_form_body"></tbody>
+        </table>
+        <button class="btn btn-add" onclick="agregarProductoForm()">+ Agregar producto</button>
+
+        <button class="btn btn-download" onclick="descargarPDFyGuardar()">DESCARGAR PDF Y AVANZAR CONSECUTIVO</button>
+    </div>
+
+    <!-- Panel Vista Previa Printable -->
+    <div class="preview-panel">
+        <div class="invoice-sheet" id="invoice_render">
+            <div class="invoice-header">
+                <div>
+                    <h1 class="brand-title">ARTEMISA</h1>
+                    <div class="brand-subtitle">
+                        <strong>Belleza & Cuidado Personal</strong><br>
+                        <strong>NIT:</strong> 1012448143-3<br>
+                        <strong>Teléfono:</strong> 310 780 9662<br>
+                        <strong>Correo:</strong> contactoartemisajyc@gmail.com<br>
+                        Bogotá, Colombia
+                    </div>
+                </div>
+                <div class="invoice-details-box">
+                    <h2>FACTURA</h2>
+                    <p><strong>N°:</strong> <span id="v_num">ART-001</span></p>
+                    <p><strong>Fecha:</strong> <span id="v_fecha">16/10/2026</span></p>
+                </div>
+            </div>
+
+            <div class="section-header">INFORMACIÓN DEL CLIENTE Y ENVÍO</div>
+            <div class="info-grid">
+                <div>
+                    <strong>Cliente:</strong> <span id="v_cliente_nombre">Carolina Mendoza</span><br>
+                    <strong>CC / NIT:</strong> <span id="v_cliente_doc">1.018.452.890</span><br>
+                    <strong>Teléfono:</strong> <span id="v_cliente_tel">312 456 7890</span><br>
+                    <strong>Dirección:</strong> <span id="v_cliente_dir">Cl. 145 #15-24, Apt 302, Bogotá</span>
+                </div>
+                <div>
+                    <strong>Método de Pago:</strong><br>
+                    <span id="v_metodo_pago">Transferencia Nequi / Bancolombia</span><br><br>
+                    <strong>Envío / Guía:</strong><br>
+                    <span id="v_guia">Interrapidísimo - Guía N° 21004859203</span>
+                </div>
+            </div>
+
+            <div class="section-header">DETALLE DEL PEDIDO</div>
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Descripción del Producto</th>
+                        <th class="text-center" style="width: 60px;">Cant.</th>
+                        <th class="text-right" style="width: 110px;">Valor Unit.</th>
+                        <th class="text-right" style="width: 110px;">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="v_items_body"></tbody>
+            </table>
+
+            <div class="totals-container">
+                <table class="totals-table">
+                    <tr>
+                        <td class="text-right">Subtotal:</td>
+                        <td class="text-right" id="v_subtotal">$ 0</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Envío:</td>
+                        <td class="text-right" id="v_envio">$ 0</td>
+                    </tr>
+                    <tr class="grand-total">
+                        <td class="text-right">TOTAL:</td>
+                        <td class="text-right" id="v_total">$ 0</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="invoice-footer">
+                ¡Gracias por elegir a <strong>Artemisa</strong> para resaltar tu belleza!<br>
+                Garantía y soporte directo a nuestra línea de WhatsApp 310 780 9662.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let productos = [
+        { desc: "Trimmer 5 en 1 Pro (Edición Artemisa)", cant: 1, precio: 85000 },
+        { desc: "Cera Moldeadora para Cabello 100g", cant: 2, precio: 25000 }
+    ];
+
+    document.getElementById('f_fecha').valueAsDate = new Date();
+
+    // Obtener o inicializar consecutivo
+    function obtenerConsecutivo() {
+        let num = localStorage.getItem('artemisa_consecutivo') || 1;
+        document.getElementById('f_num').value = 'ART-' + String(num).padStart(3, '0');
+    }
+
+    function incrementalConsecutivo() {
+        let num = parseInt(localStorage.getItem('artemisa_consecutivo') || 1) + 1;
+        localStorage.setItem('artemisa_consecutivo', num);
+        obtenerConsecutivo();
+    }
+
+    function formatoMoneda(valor) {
+        return '$ ' + Number(valor).toLocaleString('es-CO');
+    }
+
+    function renderProductosForm() {
+        const tbody = document.getElementById('items_form_body');
+        tbody.innerHTML = '';
+        productos.forEach((p, index) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><input type="text" value="${p.desc}" oninput="actualizarItem(${index}, 'desc', this.value)" style="width:100%;"></td>
+                    <td><input type="number" value="${p.cant}" oninput="actualizarItem(${index}, 'cant', this.value)" style="width:100%;"></td>
+                    <td><input type="number" value="${p.precio}" oninput="actualizarItem(${index}, 'precio', this.value)" style="width:100%;"></td>
+                    <td><button class="btn btn-remove" onclick="eliminarProductoForm(${index})">X</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    function actualizarItem(index, campo, valor) {
+        if (campo === 'cant' || campo === 'precio') {
+            productos[index][campo] = Number(valor) || 0;
+        } else {
+            productos[index][campo] = valor;
+        }
+        actualizarFactura();
+    }
+
+    function agregarProductoForm() {
+        productos.push({ desc: "Nuevo Producto", cant: 1, precio: 0 });
+        renderProductosForm();
+        actualizarFactura();
+    }
+
+    function eliminarProductoForm(index) {
+        productos.splice(index, 1);
+        renderProductosForm();
+        actualizarFactura();
+    }
+
+    function actualizarFactura() {
+        document.getElementById('v_num').innerText = document.getElementById('f_num').value;
+        document.getElementById('v_fecha').innerText = document.getElementById('f_fecha').value;
+        document.getElementById('v_cliente_nombre').innerText = document.getElementById('f_cliente_nombre').value;
+        document.getElementById('v_cliente_doc').innerText = document.getElementById('f_cliente_doc').value;
+        document.getElementById('v_cliente_tel').innerText = document.getElementById('f_cliente_tel').value;
+        document.getElementById('v_cliente_dir').innerText = document.getElementById('f_cliente_dir').value;
+        document.getElementById('v_metodo_pago').innerText = document.getElementById('f_metodo_pago').value;
+        document.getElementById('v_guia').innerText = document.getElementById('f_guia').value;
+
+        const vBody = document.getElementById('v_items_body');
+        vBody.innerHTML = '';
+        let subtotal = 0;
+
+        productos.forEach(p => {
+            const totalItem = p.cant * p.precio;
+            subtotal += totalItem;
+            vBody.innerHTML += `
+                <tr>
+                    <td>${p.desc}</td>
+                    <td class="text-center">${p.cant}</td>
+                    <td class="text-right">${formatoMoneda(p.precio)}</td>
+                    <td class="text-right">${formatoMoneda(totalItem)}</td>
+                </tr>
+            `;
+        });
+
+        const envio = Number(document.getElementById('f_envio').value) || 0;
+        const totalGrand = subtotal + envio;
+
+        document.getElementById('v_subtotal').innerText = formatoMoneda(subtotal);
+        document.getElementById('v_envio').innerText = formatoMoneda(envio);
+        document.getElementById('v_total').innerText = formatoMoneda(totalGrand);
+    }
+
+    function guardarEnHistorial(numFactura, total) {
+        let historial = JSON.parse(localStorage.getItem('artemisa_historial') || '[]');
+        historial.push({
+            num: numFactura,
+            cliente: document.getElementById('f_cliente_nombre').value,
+            fecha: document.getElementById('f_fecha').value,
+            total: total
+        });
+        localStorage.setItem('artemisa_historial', JSON.stringify(historial));
+    }
+
+    function mostrarHistorial() {
+        let historial = JSON.parse(localStorage.getItem('artemisa_historial') || '[]');
+        if (historial.length === 0) {
+            alert('Aún no hay facturas registradas en el historial.');
+            return;
+        }
+        let resumen = 'HISTORIAL DE FACTURAS EMITIDAS:\n\n';
+        historial.forEach(h => {
+            resumen += `${h.num} | ${h.fecha} | ${h.cliente} | Total: ${formatoMoneda(h.total)}\n`;
+        });
+        alert(resumen);
+    }
+
+    function descargarPDFyGuardar() {
+        const elemento = document.getElementById('invoice_render');
+        const numFactura = document.getElementById('f_num').value || 'Factura';
+        const total = document.getElementById('v_total').innerText;
+
+        const opciones = {
+            margin:       10,
+            filename:     `Factura_${numFactura}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opciones).from(elemento).save().then(() => {
+            guardarEnHistorial(numFactura, total);
+            incrementalConsecutivo();
+            actualizarFactura();
+        });
+    }
+
+    // Inicialización
+    obtenerConsecutivo();
+    renderProductosForm();
+    actualizarFactura();
+</script>
+
+</body>
+</html>
